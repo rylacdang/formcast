@@ -1,0 +1,13 @@
+providers:
+  - Rylacdang\Formcast\FormcastServiceProvider
+
+migrations: false
+
+workbench:
+  start: '/'
+  install: true
+  discovers:
+    web: true
+    api: false
+    commands: false
+    views: false

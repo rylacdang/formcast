@@ -15,7 +15,7 @@ use Rylacdang\Formcast\Formcast as FormcastRegistry;
  * @method static array<string, Closure|string> mappers()
  * @method static void flush()
  *
- * @see \Rylacdang\Formcast\Formcast
+ * @see FormcastRegistry
  */
 final class Formcast extends Facade
 {

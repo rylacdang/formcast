@@ -1,0 +1,29 @@
+name: Unsupported Rule
+description: Request client-side support for a Laravel validation rule that Formcast currently marks as server-only.
+labels: ['rule-support']
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Laravel Validation Rule
+      description: Name or class of the rule (e.g. `starts_with`, `Rule::contains()`).
+      placeholder: starts_with
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example FormRequest Usage
+      description: Show how the rule is used in `rules()`.
+      render: php
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Client Behavior & Edge Cases
+      description: What payloads should pass or fail on the client, and any Laravel quirks to preserve.
+    validations:
+      required: true

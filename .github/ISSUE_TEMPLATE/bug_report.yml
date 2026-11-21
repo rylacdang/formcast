@@ -1,0 +1,40 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in Formcast.
+labels: ['bug']
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what happened and what you expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: form-request
+    attributes:
+      label: FormRequest / Reproduction
+      description: Paste the minimal FormRequest or client code that reproduces the issue.
+      render: php
+    validations:
+      required: true
+
+  - type: textarea
+    id: generated-output
+    attributes:
+      label: Generated TypeScript Output (if applicable)
+      render: typescript
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - PHP: 8.4
+        - Laravel: 13.x
+        - rylacdang/formcast: 0.1.0
+        - @rylacdang/formcast: 0.1.0
+        - Node: 22.x
+        - Inertia / Vue / React:
+    validations:
+      required: true

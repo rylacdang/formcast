@@ -99,7 +99,7 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.0",
+    "@eslint/js": "^10.0.1",
     "@inertiajs/react": "^2.3.0 || ^3.0.0",
     "@inertiajs/vue3": "^2.3.0 || ^3.0.0",
     "@testing-library/react": "^16.3.0",

@@ -1,0 +1,29 @@
+# Composer / PHP
+/vendor/
+composer.lock
+.phpunit.cache/
+.phpunit.result.cache
+/build/
+/coverage/
+
+# Node / JS
+node_modules/
+js/dist/
+js/coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# Generated parity fixtures
+js/tests/parity/fixtures/*
+!js/tests/parity/fixtures/.gitkeep
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

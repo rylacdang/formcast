@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Rylacdang\Formcast\Rules;
 
 use RuntimeException;
+use Rylacdang\Formcast\Contracts\CastsToZod;
 use Rylacdang\Formcast\Formcast;
 
 final class RuleClassifier
@@ -160,6 +161,10 @@ final class RuleClassifier
         }
 
         if ($rule->forceServer) {
+            if ($rule->source instanceof CastsToZod) {
+                return RuleCategory::Client;
+            }
+
             if ($this->registry !== null && $this->registry->hasMapper($name)) {
                 return RuleCategory::Client;
             }

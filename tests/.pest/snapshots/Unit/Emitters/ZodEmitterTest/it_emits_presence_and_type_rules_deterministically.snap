@@ -1,0 +1,8 @@
+z.object({
+  active: fc.required(fc.boolean(m['active.boolean']), m['active.required']),
+  age: fc.nullable(fc.integer(m['age.integer']).min(18, m['age.min']).max(120, m['age.max'])),
+  name: fc.required(fc.string(m['name.string']).max(100, m['name.max']), m['name.required']),
+  price: fc.required(fc.numeric(m['price.numeric']).min(0, m['price.min']), m['price.required']),
+  secret: fc.prohibited(m['secret.prohibited']),
+  terms: fc.optional(fc.accepted(m['terms.accepted'])),
+})

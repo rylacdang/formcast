@@ -1,0 +1,8 @@
+z.object({
+  code: fc.required(fc.string(m['code.string']).regex(/^[\p{L}\p{N}_-]+$/u, m['code.alpha_dash']).refine(fc.startsWith(['ORD-', 'INV-']), m['code.starts_with']), m['code.required']),
+  email: fc.required(fc.email(m['email.email']).max(255, m['email.max']), m['email.required']),
+  payment_method: fc.required(z.enum(EmitterPaymentMethod, { message: m['payment_method.enum'] }), m['payment_method.required']),
+  publish_at: fc.nullable(fc.date(m['publish_at.date']).refine(fc.dateCompare('after', fc.date.today), m['publish_at.after'])),
+  status: fc.required(fc.in(['draft', 'published'], m['status.in']), m['status.required']),
+  website: fc.nullable(fc.string().url(m['website.url'])),
+})

@@ -1,0 +1,4 @@
+z.object({
+  mobile: fc.required(fc.string(m['mobile.string']).regex(/^(09|\+639)\d{9}$/, m['mobile.regex']), m['mobile.required']),
+  sku: fc.required(fc.string(m['sku.string']).regex(/^SKU-\d{4}$/, m['sku.regex']), m['sku.required']),
+})

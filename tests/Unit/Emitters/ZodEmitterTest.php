@@ -113,3 +113,31 @@ it('supports CastsToZod rule objects and Formcast::extend custom mappers', funct
     expect($result->schema)->toMatchSnapshot();
     expect($result->serverFields)->toBe([]);
 });
+
+it('emits cross-field and conditional rules via superRefine and records dependencies', function (): void {
+    $normalizer = new RuleNormalizer;
+    $tree = (new RuleTreeBuilder)->build($normalizer->normalizeAll([
+        'payment_method' => ['required', 'string'],
+        'gcash_reference' => ['nullable', 'required_if:payment_method,gcash', 'string', 'size:13'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+        'backup_email' => ['nullable', 'email', 'different:email'],
+        'email' => ['required', 'email'],
+        'min_price' => ['required', 'integer', 'min:0'],
+        'max_price' => ['required', 'integer', 'gt:min_price'],
+        'start_date' => ['required', 'date'],
+        'end_date' => ['required', 'date', 'after:start_date'],
+    ]));
+
+    $result = makeEmitter()->emit($tree);
+
+    expect($result->schema)->toMatchSnapshot();
+    expect($result->schema)->toContain('password_confirmation: fc.optional(fc.string())');
+    expect($result->dependencies)->toBe([
+        'email' => ['backup_email'],
+        'min_price' => ['max_price'],
+        'password' => ['password_confirmation'],
+        'password_confirmation' => ['password'],
+        'payment_method' => ['gcash_reference'],
+        'start_date' => ['end_date'],
+    ]);
+});

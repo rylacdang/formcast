@@ -1,0 +1,17 @@
+z.object({
+  backup_email: fc.nullable(fc.email(m['backup_email.email'])),
+  email: fc.required(fc.email(m['email.email']), m['email.required']),
+  end_date: fc.required(fc.date(m['end_date.date']), m['end_date.required']),
+  gcash_reference: fc.nullable(fc.string(m['gcash_reference.string']).length(13, m['gcash_reference.size'])),
+  max_price: fc.required(fc.integer(m['max_price.integer']), m['max_price.required']),
+  min_price: fc.required(fc.integer(m['min_price.integer']).min(0, m['min_price.min']), m['min_price.required']),
+  password: fc.required(fc.string(m['password.string']).min(8, m['password.min']), m['password.required']),
+  password_confirmation: fc.optional(fc.string()),
+  payment_method: fc.required(fc.string(m['payment_method.string']), m['payment_method.required']),
+  start_date: fc.required(fc.date(m['start_date.date']), m['start_date.required']),
+})
+  .superRefine(fc.different('backup_email', 'email', m['backup_email.different']))
+  .superRefine(fc.dateCompareField('end_date', 'after', 'start_date', m['end_date.after']))
+  .superRefine(fc.requiredIf('gcash_reference', 'payment_method', ['gcash'], m['gcash_reference.required_if']))
+  .superRefine(fc.compare('max_price', 'gt', 'min_price', 'numeric', m['max_price.gt']))
+  .superRefine(fc.confirmed('password', 'password_confirmation', m['password.confirmed']))

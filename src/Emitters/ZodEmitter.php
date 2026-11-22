@@ -7,6 +7,7 @@ namespace Rylacdang\Formcast\Emitters;
 use Closure;
 use Rylacdang\Formcast\Contracts\CastsToZod;
 use Rylacdang\Formcast\Contracts\RuleMapper;
+use Rylacdang\Formcast\Emitters\Mappers\CrossFieldMappers;
 use Rylacdang\Formcast\Emitters\Mappers\DateMappers;
 use Rylacdang\Formcast\Emitters\Mappers\FileMappers;
 use Rylacdang\Formcast\Emitters\Mappers\FormatMappers;
@@ -144,10 +145,15 @@ final class ZodEmitter
 
         $pad = str_repeat('  ', $indent);
         $innerPad = str_repeat('  ', $indent + 1);
-        $lines = ['z.object({'];
+
+        /** @var array<string, string> $properties */
+        $properties = [];
+
+        /** @var list<string> $confirmationFields */
+        $confirmationFields = [];
 
         foreach ($node->children as $key => $child) {
-            $expr = $this->emitNode(
+            $properties[$key] = $this->emitNode(
                 node: $child,
                 indent: $indent + 1,
                 customMessages: $customMessages,
@@ -158,8 +164,23 @@ final class ZodEmitter
                 enumClasses: $enumClasses,
                 superRefines: $superRefines,
                 dependencies: $dependencies,
+                confirmationFields: $confirmationFields,
             );
+        }
 
+        foreach ($confirmationFields as $confirmPath) {
+            $confirmKey = $this->localConfirmationKey($node->path, $confirmPath);
+
+            if ($confirmKey !== null && ! array_key_exists($confirmKey, $properties)) {
+                $properties[$confirmKey] = 'fc.optional(fc.string())';
+            }
+        }
+
+        ksort($properties, SORT_STRING);
+
+        $lines = ['z.object({'];
+
+        foreach ($properties as $key => $expr) {
             $formattedKey = $this->formatPropertyKey($key);
             $lines[] = $innerPad.$formattedKey.': '.$expr.',';
         }
@@ -177,6 +198,7 @@ final class ZodEmitter
      * @param  list<class-string<UnitEnum>>  $enumClasses
      * @param  list<string>  $superRefines
      * @param  array<string, list<string>>  $dependencies
+     * @param  list<string>  $confirmationFields
      */
     private function emitNode(
         FieldNode $node,
@@ -189,6 +211,7 @@ final class ZodEmitter
         array &$enumClasses,
         array &$superRefines,
         array &$dependencies,
+        array &$confirmationFields,
     ): string {
         $fieldType = $this->inferNodeType($node);
 
@@ -202,6 +225,7 @@ final class ZodEmitter
         );
 
         if ($node->isArray() && $node->element !== null) {
+            $elementConfirmations = [];
             $elementExpr = $this->emitNode(
                 node: $node->element,
                 indent: $indent + 1,
@@ -213,6 +237,7 @@ final class ZodEmitter
                 enumClasses: $enumClasses,
                 superRefines: $superRefines,
                 dependencies: $dependencies,
+                confirmationFields: $elementConfirmations,
             );
 
             $ctx->setBase('z.array('.$elementExpr.')');
@@ -253,6 +278,7 @@ final class ZodEmitter
         $messages = [...$messages, ...$ctx->messages()];
         $enumClasses = [...$enumClasses, ...$ctx->enumClasses()];
         $superRefines = [...$superRefines, ...$ctx->superRefines()];
+        $confirmationFields = [...$confirmationFields, ...$ctx->confirmationFields()];
 
         foreach ($ctx->dependencies() as $trigger => $dependents) {
             $dependencies[$trigger] = [...($dependencies[$trigger] ?? []), ...$dependents];
@@ -319,6 +345,7 @@ final class ZodEmitter
             new DateMappers,
             new FileMappers,
             new PasswordMapper,
+            new CrossFieldMappers,
         ];
 
         foreach ($groups as $mapper) {
@@ -326,6 +353,23 @@ final class ZodEmitter
                 $this->mappers[$ruleName] = $mapper;
             }
         }
+    }
+
+    private function localConfirmationKey(string $parentPath, string $confirmationPath): ?string
+    {
+        if ($parentPath === '') {
+            return str_contains($confirmationPath, '.') ? null : $confirmationPath;
+        }
+
+        $prefix = $parentPath.'.';
+
+        if (! str_starts_with($confirmationPath, $prefix)) {
+            return null;
+        }
+
+        $remainder = substr($confirmationPath, strlen($prefix));
+
+        return str_contains($remainder, '.') ? null : $remainder;
     }
 
     private function formatPropertyKey(string $key): string

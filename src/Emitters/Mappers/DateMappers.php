@@ -71,6 +71,19 @@ final class DateMappers implements RuleMapper
 
         if ($this->looksLikeDateLiteral($target)) {
             $ctx->chain('refine', 'fc.dateCompare('.$ctx->quote($op).', '.$ctx->quote($target).')', $ctx->message());
+
+            return;
+        }
+
+        if ($target !== '') {
+            $ctx->addSuperRefine(sprintf(
+                'fc.dateCompareField(%s, %s, %s, %s)',
+                $ctx->quote($ctx->field),
+                $ctx->quote($op),
+                $ctx->quote($target),
+                $ctx->message(),
+            ));
+            $ctx->addDependency($target, $ctx->field);
         }
     }
 

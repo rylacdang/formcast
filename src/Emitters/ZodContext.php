@@ -54,6 +54,9 @@ final class ZodContext
     /** @var array<string, list<string>> */
     private array $dependencies = [];
 
+    /** @var list<string> */
+    private array $confirmationFields = [];
+
     private ?NormalizedRule $currentRule = null;
 
     /**
@@ -235,6 +238,23 @@ final class ZodContext
         }
 
         return $this;
+    }
+
+    public function addConfirmationField(string $fieldPath): self
+    {
+        if (! in_array($fieldPath, $this->confirmationFields, true)) {
+            $this->confirmationFields[] = $fieldPath;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function confirmationFields(): array
+    {
+        return $this->confirmationFields;
     }
 
     public function quote(string $value): string

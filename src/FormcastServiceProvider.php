@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rylacdang\Formcast;
 
+use Rylacdang\Formcast\Commands\GenerateCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -13,7 +14,8 @@ final class FormcastServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('formcast')
-            ->hasConfigFile();
+            ->hasConfigFile()
+            ->hasCommand(GenerateCommand::class);
     }
 
     public function packageRegistered(): void

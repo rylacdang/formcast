@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { crossFieldHelpers } from './cross-field';
 import { type FileLike } from './types';
 
 const IPV4_REGEX =
@@ -547,4 +548,6 @@ export const fc = {
       }
     };
   },
+
+  ...crossFieldHelpers,
 };

@@ -153,5 +153,12 @@ describe('useFormcast (React)', () => {
 
     expect(submitted).toBe(true);
     expect(mockSubmit).toHaveBeenCalledWith('post', '/orders', undefined);
+
+    act(() => {
+      submitted = result.current.submit({ method: 'post', action: '/orders/form' });
+    });
+
+    expect(submitted).toBe(true);
+    expect(mockSubmit).toHaveBeenCalledWith('post', '/orders/form', undefined);
   });
 });

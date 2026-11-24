@@ -128,10 +128,14 @@ describe('useFormcast (Vue)', () => {
     expect(form.errors['gcash_reference']).toBe('GCash ref required');
     expect(mockSubmit).not.toHaveBeenCalled();
 
-    // Fix gcash_reference and submit with Wayfinder route object
+    // Fix gcash_reference and submit with Wayfinder route object ({ url, method }) and .form() ({ action, method })
     form.gcash_reference = '1234567890123';
     const submitted = form.submit({ method: 'post', url: '/orders' });
     expect(submitted).toBe(true);
     expect(mockSubmit).toHaveBeenCalledWith('post', '/orders', undefined);
+
+    const submittedFormVariant = form.submit({ method: 'post', action: '/orders/form' });
+    expect(submittedFormVariant).toBe(true);
+    expect(mockSubmit).toHaveBeenCalledWith('post', '/orders/form', undefined);
   });
 });

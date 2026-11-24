@@ -4,9 +4,12 @@ import { createValidator, type Cast, type CastInput, type FormcastValidator } fr
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
-export interface WayfinderRoute {
-  readonly url: string;
-  readonly method: HttpMethod;
+export type WayfinderRoute =
+  | { readonly url: string; readonly method: HttpMethod }
+  | { readonly action: string; readonly method: HttpMethod };
+
+function resolveRouteUrl(route: WayfinderRoute): string {
+  return 'url' in route ? route.url : route.action;
 }
 
 export interface UseFormcastOptions {
@@ -109,7 +112,10 @@ export function useFormcast<TCast extends Cast, TData extends object>(
   const precognitionEndpoint = resolvePrecognitionEndpoint(cast, options.precognition);
 
   if (precognitionEndpoint !== null && typeof baseForm.withPrecognition === 'function') {
-    baseForm = baseForm.withPrecognition(precognitionEndpoint.method, precognitionEndpoint.url);
+    baseForm = baseForm.withPrecognition(
+      precognitionEndpoint.method,
+      resolveRouteUrl(precognitionEndpoint),
+    );
   }
 
   const markTouched = useCallback((field: string) => {
@@ -206,7 +212,7 @@ export function useFormcast<TCast extends Cast, TData extends object>(
       if (typeof methodOrRoute === 'object') {
         baseForm.submit(
           methodOrRoute.method,
-          methodOrRoute.url,
+          resolveRouteUrl(methodOrRoute),
           typeof urlOrOptions === 'object' ? urlOrOptions : undefined,
         );
       } else if (typeof urlOrOptions === 'string') {

@@ -73,6 +73,10 @@ final class MessageResolver
             return $translated;
         }
 
+        if (str_contains($field, '.')) {
+            return $field;
+        }
+
         return str_replace('_', ' ', Str::snake($field));
     }
 
@@ -188,9 +192,7 @@ final class MessageResolver
             'same', 'different', 'in_array', 'required_if_accepted', 'required_if_declined' => [
                 ':other' => $this->resolveAttribute($params[0] ?? '', $customAttributes, $locale),
             ],
-            'gt', 'gte', 'lt', 'lte' => [
-                ':value' => $this->resolveAttribute($params[0] ?? '', $customAttributes, $locale),
-            ],
+            'gt', 'gte', 'lt', 'lte' => [],
             'starts_with', 'ends_with', 'doesnt_start_with', 'doesnt_end_with', 'mimes', 'mimetypes', 'extensions' => [
                 ':values' => implode(', ', $params),
             ],
@@ -235,6 +237,16 @@ final class MessageResolver
             return $translated;
         }
 
-        return $parameter;
+        $lower = strtolower($parameter);
+
+        if (
+            in_array($lower, ['today', 'tomorrow', 'yesterday', 'now'], true)
+            || preg_match('/^\d{4}-\d{2}-\d{2}/', $parameter) === 1
+            || strtotime($parameter) !== false
+        ) {
+            return $parameter;
+        }
+
+        return str_replace('_', ' ', Str::snake($parameter));
     }
 }

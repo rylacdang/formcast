@@ -366,7 +366,11 @@ export const crossFieldHelpers = {
                 : left <= right;
 
         if (!ok) {
-          ctx.addIssue({ code: 'custom', path, message });
+          ctx.addIssue({
+            code: 'custom',
+            path,
+            message: message.replaceAll(':value', String(right)),
+          });
         }
       });
     };
@@ -399,7 +403,11 @@ export const crossFieldHelpers = {
                   : left <= right;
 
         if (!ok) {
-          ctx.addIssue({ code: 'custom', path, message });
+          ctx.addIssue({
+            code: 'custom',
+            path,
+            message: message.replaceAll(':value', String(right)),
+          });
         }
       });
     };

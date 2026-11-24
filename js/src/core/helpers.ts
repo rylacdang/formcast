@@ -167,7 +167,7 @@ export const fc = {
   // --- Presence wrappers ---
 
   required<T extends z.ZodType>(schema: T, message?: string): z.ZodType<z.output<T>> {
-    return z.any().superRefine((val, ctx) => {
+    return z.unknown().superRefine((val, ctx) => {
       if (isMissing(val)) {
         ctx.addIssue({ code: 'custom', message: message ?? 'This field is required.' });
         return;
@@ -183,26 +183,29 @@ export const fc = {
           });
         }
       }
-    });
+    }) as z.ZodType<z.output<T>>;
   },
 
   nullable<T extends z.ZodType>(schema: T): z.ZodType<z.output<T> | null | undefined> {
-    return z.any().superRefine((val, ctx) => {
-      if (val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) {
-        return;
-      }
-
-      const result = schema.safeParse(val);
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          ctx.addIssue({
-            code: 'custom',
-            path: issue.path,
-            message: issue.message,
-          });
+    return z
+      .any()
+      .optional()
+      .superRefine((val, ctx) => {
+        if (val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) {
+          return;
         }
-      }
-    });
+
+        const result = schema.safeParse(val);
+        if (!result.success) {
+          for (const issue of result.error.issues) {
+            ctx.addIssue({
+              code: 'custom',
+              path: issue.path,
+              message: issue.message,
+            });
+          }
+        }
+      });
   },
 
   optional<T extends z.ZodType>(schema: T): z.ZodType<z.output<T> | null | undefined> {
@@ -210,50 +213,56 @@ export const fc = {
   },
 
   sometimes<T extends z.ZodType>(schema: T): z.ZodType<z.output<T> | undefined> {
-    return z.any().superRefine((val, ctx) => {
-      if (val === undefined) {
-        return;
-      }
-
-      const result = schema.safeParse(val);
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          ctx.addIssue({
-            code: 'custom',
-            path: issue.path,
-            message: issue.message,
-          });
+    return z
+      .any()
+      .optional()
+      .superRefine((val, ctx) => {
+        if (val === undefined) {
+          return;
         }
-      }
-    });
+
+        const result = schema.safeParse(val);
+        if (!result.success) {
+          for (const issue of result.error.issues) {
+            ctx.addIssue({
+              code: 'custom',
+              path: issue.path,
+              message: issue.message,
+            });
+          }
+        }
+      });
   },
 
   filled<T extends z.ZodType>(schema: T, message?: string): z.ZodType<z.output<T> | undefined> {
-    return z.any().superRefine((val, ctx) => {
-      if (val === undefined) {
-        return;
-      }
-
-      if (isMissing(val)) {
-        ctx.addIssue({ code: 'custom', message: message ?? 'This field must have a value.' });
-        return;
-      }
-
-      const result = schema.safeParse(val);
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          ctx.addIssue({
-            code: 'custom',
-            path: issue.path,
-            message: issue.message,
-          });
+    return z
+      .any()
+      .optional()
+      .superRefine((val, ctx) => {
+        if (val === undefined) {
+          return;
         }
-      }
-    });
+
+        if (isMissing(val)) {
+          ctx.addIssue({ code: 'custom', message: message ?? 'This field must have a value.' });
+          return;
+        }
+
+        const result = schema.safeParse(val);
+        if (!result.success) {
+          for (const issue of result.error.issues) {
+            ctx.addIssue({
+              code: 'custom',
+              path: issue.path,
+              message: issue.message,
+            });
+          }
+        }
+      });
   },
 
   present<T extends z.ZodType>(schema: T, message?: string): z.ZodType<z.output<T> | null> {
-    return z.any().superRefine((val, ctx) => {
+    return z.unknown().superRefine((val, ctx) => {
       if (val === undefined) {
         ctx.addIssue({ code: 'custom', message: message ?? 'This field must be present.' });
         return;
@@ -273,23 +282,29 @@ export const fc = {
           });
         }
       }
-    });
+    }) as z.ZodType<z.output<T> | null>;
   },
 
   prohibited(message?: string): z.ZodType {
-    return z.any().superRefine((val, ctx) => {
-      if (!isMissing(val)) {
-        ctx.addIssue({ code: 'custom', message: message ?? 'This field is prohibited.' });
-      }
-    });
+    return z
+      .any()
+      .optional()
+      .superRefine((val, ctx) => {
+        if (!isMissing(val)) {
+          ctx.addIssue({ code: 'custom', message: message ?? 'This field is prohibited.' });
+        }
+      });
   },
 
   missing(message?: string): z.ZodType {
-    return z.any().superRefine((val, ctx) => {
-      if (val !== undefined) {
-        ctx.addIssue({ code: 'custom', message: message ?? 'This field must be missing.' });
-      }
-    });
+    return z
+      .any()
+      .optional()
+      .superRefine((val, ctx) => {
+        if (val !== undefined) {
+          ctx.addIssue({ code: 'custom', message: message ?? 'This field must be missing.' });
+        }
+      });
   },
 
   // --- Type builders ---

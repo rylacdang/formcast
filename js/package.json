@@ -1,6 +1,6 @@
 {
   "name": "@rylacdang/formcast",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Cast your Laravel FormRequest rules to typed Zod schemas, TypeScript types, and Laravel-identical error messages.",
   "license": "MIT",
   "author": {

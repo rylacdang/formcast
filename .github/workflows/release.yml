@@ -59,6 +59,11 @@ jobs:
           npm --prefix js test
           npm --prefix js run test:parity
 
+      - name: Copy README and LICENSE for npm package
+        run: |
+          sed 's|src="art/logo.svg"|src="https://raw.githubusercontent.com/rylacdang/formcast/main/art/logo.svg"|g; s|(docs/|(https://github.com/rylacdang/formcast/blob/main/docs/|g' README.md > js/README.md
+          cp LICENSE.md js/LICENSE.md
+
       - name: Publish npm package with provenance
         working-directory: js
         env:

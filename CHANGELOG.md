@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-25
+
+### Added
+- Support reflecting closure routes (`ReflectionFunction`) in `RouteScanner`.
+- Emit Wayfinder-style named-route barrel exports (`routes/<group>/index.ts`) in `formcast:generate`.
+- Support Wayfinder `.form()` `{ action, method }` objects alongside `{ url, method }` in Vue and React `useFormcast()`.
+- Include `README.md` (with absolute logo and docs links) and `LICENSE.md` in published npm tarballs.
+
 ## [0.1.0] - 2026-11-25
 
 ### Added

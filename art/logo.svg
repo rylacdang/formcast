@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 100" fill="none" role="img" aria-label="Formcast">
+  <defs>
+    <linearGradient id="formcast-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="55%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <text
+    x="230"
+    y="68"
+    text-anchor="middle"
+    font-family="'Space Grotesk', 'Outfit', 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif"
+    font-size="68"
+    font-weight="800"
+    letter-spacing="-2.5"
+    fill="url(#formcast-grad)"
+  >formcast</text>
+</svg>

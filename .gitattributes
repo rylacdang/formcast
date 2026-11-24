@@ -2,6 +2,7 @@
 
 /.agents export-ignore
 /.github export-ignore
+/art export-ignore
 /docs export-ignore
 /js export-ignore
 /tests export-ignore

@@ -7,6 +7,8 @@ namespace Rylacdang\Formcast\Discovery;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Routing\Router;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionUnionType;
@@ -18,7 +20,7 @@ final class RouteScanner
     ) {}
 
     /**
-     * Scan registered routes and map each FormRequest FQCN to the controller actions using it.
+     * Scan registered routes and map each FormRequest FQCN to the controller or closure actions using it.
      *
      * @return array<class-string<FormRequest>, list<array{action: string, methods: list<string>, uri: string, name: ?string}>>
      */
@@ -28,30 +30,34 @@ final class RouteScanner
         $map = [];
 
         foreach ($this->router->getRoutes()->getRoutes() as $route) {
-            if ($route->getAction('uses') instanceof Closure) {
-                continue;
+            $uses = $route->getAction('uses');
+
+            if ($uses instanceof Closure) {
+                $requestClasses = $this->extractFormRequestTypes(new ReflectionFunction($uses));
+                $actionLabel = 'Closure';
+            } else {
+                $actionName = $route->getActionName();
+
+                if ($actionName === '' || $actionName === 'Closure') {
+                    continue;
+                }
+
+                [$controller, $method] = $this->parseAction($actionName);
+
+                if (! class_exists($controller) || ! method_exists($controller, $method)) {
+                    continue;
+                }
+
+                $requestClasses = $this->extractFormRequestTypes(new ReflectionMethod($controller, $method));
+                $actionLabel = $method === '__invoke' ? $controller : $controller.'@'.$method;
             }
-
-            $actionName = $route->getActionName();
-
-            if ($actionName === '' || $actionName === 'Closure') {
-                continue;
-            }
-
-            [$controller, $method] = $this->parseAction($actionName);
-
-            if (! class_exists($controller) || ! method_exists($controller, $method)) {
-                continue;
-            }
-
-            $requestClasses = $this->extractFormRequestTypes(new ReflectionMethod($controller, $method));
 
             if ($requestClasses === []) {
                 continue;
             }
 
             $entry = [
-                'action' => $method === '__invoke' ? $controller : $controller.'@'.$method,
+                'action' => $actionLabel,
                 'methods' => $this->normalizeMethods($route->methods()),
                 'uri' => '/'.ltrim($route->uri(), '/'),
                 'name' => $route->getName(),
@@ -93,12 +99,12 @@ final class RouteScanner
     /**
      * @return list<class-string<FormRequest>>
      */
-    private function extractFormRequestTypes(ReflectionMethod $method): array
+    private function extractFormRequestTypes(ReflectionFunctionAbstract $callable): array
     {
         /** @var list<class-string<FormRequest>> $types */
         $types = [];
 
-        foreach ($method->getParameters() as $parameter) {
+        foreach ($callable->getParameters() as $parameter) {
             $type = $parameter->getType();
 
             $namedTypes = match (true) {
@@ -132,11 +138,9 @@ final class RouteScanner
      */
     private function normalizeMethods(array $methods): array
     {
-        $filtered = array_values(array_filter(
+        return array_values(array_filter(
             $methods,
             static fn (string $method): bool => $method !== 'HEAD' || ! in_array('GET', $methods, true),
         ));
-
-        return $filtered;
     }
 }

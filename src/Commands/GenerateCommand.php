@@ -7,6 +7,7 @@ namespace Rylacdang\Formcast\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Str;
 use ReflectionClass;
 use RuntimeException;
 use Rylacdang\Formcast\Contracts\RuleMapper;
@@ -110,6 +111,9 @@ final class GenerateCommand extends Command
         /** @var array<string, string> $barrelEntries */
         $barrelEntries = [];
 
+        /** @var array<string, array<string, string>> $namedRouteFiles */
+        $namedRouteFiles = [];
+
         /** @var array<class-string<UnitEnum>, string> $emittedEnums */
         $emittedEnums = [];
 
@@ -187,6 +191,24 @@ final class GenerateCommand extends Command
 
             $barrelKey = $this->uniqueBarrelAlias($extracted->exportName, $extracted->class, $barrelEntries);
             $barrelEntries[$barrelKey] = $castRelativePath;
+
+            foreach ($routeMap[$extracted->class] ?? [] as $routeUsage) {
+                $routeName = $routeUsage['name'];
+
+                if ($routeName === null || $routeName === '') {
+                    continue;
+                }
+
+                [$routeIndexFile, $routeExportName] = $this->namedRouteTarget($routeName);
+
+                if ($routeExportName !== '') {
+                    $namedRouteFiles[$routeIndexFile][$routeExportName] = $castRelativePath;
+                }
+            }
+        }
+
+        foreach ($namedRouteFiles as $routeIndexFile => $routeExports) {
+            $files[$routeIndexFile] = TsCode::composeNamedRouteIndex($routeIndexFile, $routeExports);
         }
 
         $files['index.ts'] = TsCode::composeBarrelIndex($barrelEntries);
@@ -274,6 +296,33 @@ final class GenerateCommand extends Command
         }
 
         return $normalized;
+    }
+
+    /**
+     * Map a Laravel route name (e.g. `orders.store`, `admin.orders.update`, `checkout`)
+     * to a Wayfinder-style `routes/<group>/index.ts` file and export identifier.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function namedRouteTarget(string $routeName): array
+    {
+        $segments = array_values(array_filter(
+            explode('.', $routeName),
+            static fn (string $segment): bool => $segment !== '',
+        ));
+
+        if ($segments === []) {
+            return ['routes/index.ts', ''];
+        }
+
+        $exportRaw = array_pop($segments);
+        $exportName = Str::camel(preg_replace('/[^a-zA-Z0-9_]+/', '_', $exportRaw) ?? $exportRaw);
+
+        if ($segments === []) {
+            return ['routes/index.ts', $exportName];
+        }
+
+        return ['routes/'.implode('/', $segments).'/index.ts', $exportName];
     }
 
     /**

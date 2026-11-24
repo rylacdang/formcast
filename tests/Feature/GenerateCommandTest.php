@@ -45,10 +45,17 @@ it('generates casts, shared enums, barrel index, and route metadata end-to-end',
     $requestFile = $this->outputDir.'/Workbench/App/Http/Requests/StoreOrderRequest.ts';
     $enumFile = $this->outputDir.'/Workbench/App/Enums/PaymentMethod.ts';
     $barrelFile = $this->outputDir.'/index.ts';
+    $namedRouteFile = $this->outputDir.'/routes/orders/index.ts';
 
     expect(is_file($requestFile))->toBeTrue();
     expect(is_file($enumFile))->toBeTrue();
     expect(is_file($barrelFile))->toBeTrue();
+    expect(is_file($namedRouteFile))->toBeTrue();
+
+    $namedRouteContents = (string) file_get_contents($namedRouteFile);
+    expect($namedRouteContents)->toContain(
+        "export { default as store } from '../../Workbench/App/Http/Requests/StoreOrderRequest';",
+    );
 
     $requestContents = (string) file_get_contents($requestFile);
     expect($requestContents)->toContain("import { PaymentMethod } from '../../Enums/PaymentMethod';");

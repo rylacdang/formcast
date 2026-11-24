@@ -29,6 +29,7 @@ it('maps FormRequests to controller actions, invokable controllers, uris, verbs,
     $router->put('/orders/{id}', [SampleOrderController::class, 'update'])->name('orders.update');
     $router->get('/orders', [SampleOrderController::class, 'index'])->name('orders.index');
     $router->post('/checkout', SampleInvokableController::class)->name('checkout');
+    $router->post('/quick-order', fn (BasicRequest $request): string => 'ok')->name('orders.quick');
     $router->get('/health', fn () => 'ok');
 
     $scanner = new RouteScanner($router);
@@ -36,6 +37,12 @@ it('maps FormRequests to controller actions, invokable controllers, uris, verbs,
 
     expect($map)->toBe([
         BasicRequest::class => [
+            [
+                'action' => 'Closure',
+                'methods' => ['POST'],
+                'uri' => '/quick-order',
+                'name' => 'orders.quick',
+            ],
             [
                 'action' => SampleOrderController::class.'@store',
                 'methods' => ['POST'],

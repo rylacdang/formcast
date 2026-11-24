@@ -68,8 +68,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest run --exclude tests/parity/**",
-    "test:watch": "vitest --exclude tests/parity/**",
+    "test": "vitest run --exclude \"tests/parity/**\"",
+    "test:watch": "vitest --exclude \"tests/parity/**\"",
     "test:parity": "vitest run tests/parity",
     "typecheck": "tsc --noEmit"
   },
